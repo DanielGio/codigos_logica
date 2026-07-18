@@ -7,7 +7,7 @@ if quantidade_solicitada <= estoque:
     print("Pedido aprovado!")
 else: print("Pedido Excede estoque!")
 
-print("")
+print()
 
 quantidade_solicitada = int(input("Digite a quantidade solicitada: "))
 

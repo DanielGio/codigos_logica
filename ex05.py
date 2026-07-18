@@ -1,4 +1,6 @@
-nota = float(input("Digite a nota: "))
+# Questão (5)  Sistema de notas 
+
+nota = float( input("Digite a nota: "))
 
 if 9 <= nota <= 10:
     print("Excelente")
