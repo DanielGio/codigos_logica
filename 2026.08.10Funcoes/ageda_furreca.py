@@ -1,7 +1,7 @@
 ############################################
 # 2026.08.10.Funcoes\agenda_furreca.py     #
 # AGENDA FURRECA.PY                        #
-# Versão 2026.08.10                        #
+# Versão 2026.08.11                        #
 # By Luferat - https://github.xonm/Luferat #
 ############################################
 
@@ -12,16 +12,14 @@ import os
 # Importa "random" para gerar números aleatórios
 import random
 
-# Banco de dados em memória (dict)
+# Banco de dados em memória (dict) (Moch)
 database = {
     "1": {"name": "Joca da Silva", "contact": "(21) 998877665"},
     "120": {"name": "Mariana Sirilampo", "contact": "mariana@sirilampo.com.br"}
 }
 
-# Limpa a tela
-
-
 def cls():
+    # Limpa a tela
     if os.name == "nt":
         # Se o sistema é Windows
         subprocess.run("cls", shell=True)
@@ -29,10 +27,9 @@ def cls():
         # Outros sistemas como Linux e MacOS
         subprocess.run("clear", shell=True)
 
-# Cadastra novo contato
-
 
 def new_contact():
+    # Cadastra novo contato
     # Limpa a tela
     cls()
 
@@ -41,7 +38,15 @@ def new_contact():
     print("\nDigite os dados do contato:\n")
 
     # Recebe os dados do usuário
-    name = input(" • Nome: ")
+
+    # Recebe e valida o "name"
+    while True:
+        name = input(" • Nome: ")
+        if name.strip() != "":
+            break
+        print("-----", "Digite um nome válido!", "-----")
+
+
     contact = input(" • Contato: ")
 
     # Gera o ID aleatório
@@ -102,7 +107,7 @@ def delete_contact():
     input("Tecle [Enter] para continuar")
     main()
 
-def main(erro=str()):
+def main(error = str()):
     # Programa principal e "main loop"
     while True:
         # Limpa a tela
@@ -122,9 +127,9 @@ Opções:
 0 - Sair do programa
     ''')
 
-        # Exibe mensagem de erro se existir
-        if erro:
-            print("-----", erro, "-----")
+        # Exibe mensagem de error se existir
+        if error:
+            print("-----", error, "-----")
 
         # Recebe opção do usuário
         opcao = input("Escolha uma opção: ")
@@ -146,8 +151,8 @@ Opções:
                 exit()
             case _:
                 # Se escolheu uma opção inválida, chama o menu novamente, mas, com a mensagem de erro.
-                erro = "Digite uma opção válida!"
-                main(erro)
+                error = "Digite uma opção válida!"
+                main(error)
 
 
 # "Roda" o programa
