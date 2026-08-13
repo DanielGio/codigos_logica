@@ -1,7 +1,7 @@
 ############################################
 # 2026.08.10.Funcoes\agenda_furreca.py     #
 # AGENDA FURRECA.PY                        #
-# Versão 2026.08.11                        #
+# Versão 2026.08.12 - Interface melhorada  #
 # By Luferat - https://github.xonm/Luferat #
 ############################################
 
@@ -12,11 +12,24 @@ import os
 # Importa "random" para gerar números aleatórios
 import random
 
-# Banco de dados em memória (dict) (Moch)
+# Banco de dados em memória (dict) (Mock)
 database = {
     "1": {"name": "Joca da Silva", "contact": "(21) 998877665", "status": "ON"},
     "120": {"name": "Mariana Sirilampo", "contact": "mariana@sirilampo.com.br", "status": "ON"}
 }
+
+
+# ------------------------------------------------------------------
+# NOVO: cores ANSI para deixar a interface mais clara
+# ------------------------------------------------------------------
+class Cor:
+    VERDE = "\033[92m"
+    VERMELHO = "\033[91m"
+    AMARELO = "\033[93m"
+    AZUL = "\033[94m"
+    CIANO = "\033[96m"
+    RESET = "\033[0m"
+    NEGRITO = "\033[1m"
 
 
 def cls():
@@ -29,30 +42,50 @@ def cls():
         subprocess.run("clear", shell=True)
 
 
+# ------------------------------------------------------------------
+# NOVO: cabeçalho padronizado com borda, usado em todas as telas
+# ------------------------------------------------------------------
+def header(titulo, largura=50):
+    print(Cor.CIANO + "╔" + "═" * (largura - 2) + "╗")
+    print("║" + titulo.center(largura - 2) + "║")
+    print("╚" + "═" * (largura - 2) + "╝" + Cor.RESET)
+
+
+# ------------------------------------------------------------------
+# NOVO: helpers de mensagem coloridos (erro/sucesso), sem mudar
+# nenhuma regra de validação já existente
+# ------------------------------------------------------------------
+def msg_erro(texto):
+    print(f"{Cor.VERMELHO}----- {texto} -----{Cor.RESET}")
+
+
+def msg_sucesso(texto):
+    print(f"{Cor.VERDE}{texto}{Cor.RESET}")
+
+
+def prompt(texto):
+    return input(f"{Cor.AMARELO}» {Cor.RESET}{texto}")
+
+
 def new_contact():
     # Cadastra novo contato
-    # Limpa a tela
     cls()
-
-    # Cabeçalho
-    print("[ AGENDA FURRECA - NOVO CONTATO ]")
+    header("AGENDA FURRECA - NOVO CONTATO")
     print("\nDigite os dados do contato:\n")
-
-    # Recebe os dados do usuário
 
     # Recebe e valida o "name"
     while True:
-        name = input(" • Nome: ")
+        name = prompt(" • Nome: ")
         if name.strip() != "":
             break
-        print("-----", "Digite um nome válido!", "-----")
+        msg_erro("Digite um nome válido!")
 
     # Recebe e valida o "contact"
     while True:
-        contact = input(" • Contato: ")
+        contact = prompt(" • Contato: ")
         if contact.strip() != "":
             break
-        print("-----", "Digite um contato válido!", "-----")
+        msg_erro("Digite um contato válido!")
 
     # Gera o ID aleatório e não repetido
     while True:
@@ -60,93 +93,94 @@ def new_contact():
         if key not in database:
             break
 
-    # Salva o novo cadastro no formato "dict"
-    database[key] = dict(name=name, contact=contact)
+    # Salva o novo cadastro (mantendo o campo "status", que existia
+    # no banco original mas não estava sendo salvo aqui)
+    database[key] = dict(name=name, contact=contact, status="ON")
 
-    # Confirmação
-    print(f"\nUsuário com ID {key} adicionado!")
+    print()
+    msg_sucesso(f"Usuário com ID {key} adicionado!")
     input("Tecle [Enter] para continuar")
 
-    # Chama o menu principal
     main()
 
 
 def list_contacts():
-    # Lista todos os registros
-    # Limpa a tela
+    # Lista todos os registros em formato de tabela
     cls()
+    header("AGENDA FURRECA - LISTA DE CONTATOS")
+    print()
+    print(f"{Cor.NEGRITO}{len(database)} usuário(s) encontrado(s){Cor.RESET}")
+    print()
 
-    # Cabeçalho
-    print("[ AGENDA FURRECA - LISTA CONTATOS ]")
-    print()
-    print(len(database), "usuários encontrados!")
-    print()
+    # Cabeçalho da tabela
+    print(f"{Cor.NEGRITO}{'ID':<6}{'Nome':<25}{'Contato':<25}{'Status':<8}{Cor.RESET}")
+    print("-" * 64)
 
     # Loop para iterar os registros usando o método `dict.items()`
     for key, value in database.items():
-        # Formata a saída
-        print("ID:", key)
-        print(" • Nome:", value['name'])
-        print(" • Contato:", value['contact'])
-        print()
+        status = value.get("status", "-")
+        cor_status = Cor.VERDE if status == "ON" else Cor.VERMELHO
+        print(f"{key:<6}{value['name']:<25}{value['contact']:<25}{cor_status}{status:<8}{Cor.RESET}")
 
-    # Confirma e chama o menu principal
+    print()
     input("Tecle [Enter] para continuar")
     main()
 
 
 def edit_contact():
     cls()
-    print("[ AGENDA FURRECA - EDITA CONTATO ]")
+    header("AGENDA FURRECA - EDITA CONTATO")
 
     print()
     while True:
-        key = input("Digite o ID do usuário: ")
+        key = prompt("Digite o ID do usuário: ")
         if key in database:
             break
-        print("-----", "ID não encontrado!", "-----")
+        msg_erro("ID não encontrado!")
 
     print()
     print("ID:", key)
     print(" • Nome:", database[key]['name'])
     print(" • Contato:", database[key]['contact'])
+    print(" • Status:", database[key].get('status', '-'))
     print()
 
     print("Digite os novos dados:")
 
     # Recebe e valida o "name"
     while True:
-        name = input(" • Nome: ")
+        name = prompt(" • Nome: ")
         if name.strip() != "":
             break
-        print("-----", "Digite um nome válido!", "-----")
+        msg_erro("Digite um nome válido!")
 
     # Recebe e valida o "contact"
     while True:
-        contact = input(" • Contato: ")
+        contact = prompt(" • Contato: ")
         if contact.strip() != "":
             break
-        print("-----", "Digite um contato válido!", "-----")    
+        msg_erro("Digite um contato válido!")
 
-    # Atualizar
-    database[key] = dict(name = name, contact = contact)
+    # Atualiza mantendo o "status" que o contato já tinha
+    status_atual = database[key].get("status", "ON")
+    database[key] = dict(name=name, contact=contact, status=status_atual)
 
     print()
-    print("Contato atualizado!")
+    msg_sucesso("Contato atualizado!")
     input("Tecle [Enter] para continuar")
     main()
 
 
 def delete_contact():
     cls()
-    print("[ AGENDA FURRECA - APAGA CONTATO ]")
+    header("AGENDA FURRECA - APAGA CONTATO")
 
     print()
     while True:
-        key = input("Digite o ID do usuário: ")
+        key = prompt("Digite o ID do usuário: ")
         if key in database:
             break
-        print("-----", "ID não encontrado!", "-----")
+        msg_erro("ID não encontrado!")
 
     print()
     print("ID:", key)
@@ -154,10 +188,10 @@ def delete_contact():
     print(" • Contato:", database[key]['contact'])
     print()
 
-    option = input("Tem certeza que deseja apagar [S/N]? ")
+    option = prompt(f"{Cor.VERMELHO}Tem certeza que deseja apagar [S/N]? {Cor.RESET}")
     if option.upper() == "S":
         del database[key]
-        print("Contato apagado!")
+        msg_sucesso("Contato apagado!")
     else:
         print()
         print("Não aconteceu nada!")
@@ -173,11 +207,11 @@ def main(error=str()):
         cls()
 
         # Cabeçalho
-        print("[ AGENDA FURRECA - MENU PRINCIPAL ]")
+        header("AGENDA FURRECA - MENU PRINCIPAL")
 
         # Exibe menu principal
-        print('''
-Opções:
+        print(f'''
+{Cor.NEGRITO}Opções:{Cor.RESET}
 
 1 - Novo contato
 2 - Listar contatos
@@ -186,12 +220,12 @@ Opções:
 0 - Sair do programa
     ''')
 
-        # Exibe mensagem de error se existir
+        # Exibe mensagem de erro se existir
         if error:
-            print("-----", error, "-----")
+            msg_erro(error)
 
         # Recebe opção do usuário
-        opcao = input("Escolha uma opção: ")
+        opcao = prompt("Escolha uma opção: ")
 
         # Executa a opção selecionada
         match opcao:
@@ -206,7 +240,7 @@ Opções:
             case "0":
                 # Limpa a tela, exibe confirmação e termina o programa
                 cls()
-                print("\nAcabou!")
+                print(f"\n{Cor.CIANO}Acabou!{Cor.RESET}")
                 exit()
             case _:
                 # Se escolheu uma opção inválida, chama o menu novamente, mas, com a mensagem de erro.
@@ -216,4 +250,3 @@ Opções:
 
 # "Roda" o programa
 main()
-

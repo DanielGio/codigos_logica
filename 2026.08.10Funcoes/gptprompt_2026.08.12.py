@@ -12,11 +12,39 @@ import os
 # Importa "random" para gerar números aleatórios
 import random
 
+# Importa "json" para trabalhar com arquivos JSON
+import json
+
+
 # Banco de dados em memória (dict) (Moch)
-database = {
-    "1": {"name": "Joca da Silva", "contact": "(21) 998877665", "status": "ON"},
-    "120": {"name": "Mariana Sirilampo", "contact": "mariana@sirilampo.com.br", "status": "ON"}
-}
+database = {}
+
+
+def load_database():
+    # Carrega os dados do arquivo JSON para o "database"
+
+    global database
+
+    try:
+        with open("database.json", "r", encoding="utf-8") as file:
+            database = json.load(file)
+
+    except FileNotFoundError:
+        # Se o arquivo ainda não existe,
+        # começa com um banco vazio
+        database = {}
+
+
+def save_database():
+    # Salva o "database" no arquivo JSON
+
+    with open("database.json", "w", encoding="utf-8") as file:
+        json.dump(
+            database,
+            file,
+            indent=4,
+            ensure_ascii=False
+        )
 
 
 def cls():
@@ -31,6 +59,7 @@ def cls():
 
 def new_contact():
     # Cadastra novo contato
+
     # Limpa a tela
     cls()
 
@@ -63,6 +92,9 @@ def new_contact():
     # Salva o novo cadastro no formato "dict"
     database[key] = dict(name=name, contact=contact)
 
+    # Salva o database no arquivo JSON
+    save_database()
+
     # Confirmação
     print(f"\nUsuário com ID {key} adicionado!")
     input("Tecle [Enter] para continuar")
@@ -73,6 +105,7 @@ def new_contact():
 
 def list_contacts():
     # Lista todos os registros
+
     # Limpa a tela
     cls()
 
@@ -100,10 +133,13 @@ def edit_contact():
     print("[ AGENDA FURRECA - EDITA CONTATO ]")
 
     print()
+
     while True:
         key = input("Digite o ID do usuário: ")
+
         if key in database:
             break
+
         print("-----", "ID não encontrado!", "-----")
 
     print()
@@ -117,22 +153,30 @@ def edit_contact():
     # Recebe e valida o "name"
     while True:
         name = input(" • Nome: ")
+
         if name.strip() != "":
             break
+
         print("-----", "Digite um nome válido!", "-----")
 
     # Recebe e valida o "contact"
     while True:
         contact = input(" • Contato: ")
+
         if contact.strip() != "":
             break
-        print("-----", "Digite um contato válido!", "-----")    
+
+        print("-----", "Digite um contato válido!", "-----")
 
     # Atualizar
-    database[key] = dict(name = name, contact = contact)
+    database[key] = dict(name=name, contact=contact)
+
+    # Salva as alterações no arquivo JSON
+    save_database()
 
     print()
     print("Contato atualizado!")
+
     input("Tecle [Enter] para continuar")
     main()
 
@@ -142,10 +186,13 @@ def delete_contact():
     print("[ AGENDA FURRECA - APAGA CONTATO ]")
 
     print()
+
     while True:
         key = input("Digite o ID do usuário: ")
+
         if key in database:
             break
+
         print("-----", "ID não encontrado!", "-----")
 
     print()
@@ -155,9 +202,16 @@ def delete_contact():
     print()
 
     option = input("Tem certeza que deseja apagar [S/N]? ")
+
     if option.upper() == "S":
+
         del database[key]
+
+        # Salva as alterações no arquivo JSON
+        save_database()
+
         print("Contato apagado!")
+
     else:
         print()
         print("Não aconteceu nada!")
@@ -168,6 +222,7 @@ def delete_contact():
 
 def main(error=str()):
     # Programa principal e "main loop"
+
     while True:
         # Limpa a tela
         cls()
@@ -195,25 +250,34 @@ Opções:
 
         # Executa a opção selecionada
         match opcao:
+
             case "1":
                 new_contact()
+
             case "2":
                 list_contacts()
+
             case "3":
                 edit_contact()
+
             case "4":
                 delete_contact()
+
             case "0":
                 # Limpa a tela, exibe confirmação e termina o programa
                 cls()
                 print("\nAcabou!")
                 exit()
+
             case _:
-                # Se escolheu uma opção inválida, chama o menu novamente, mas, com a mensagem de erro.
+                # Se escolheu uma opção inválida,
+                # chama o menu novamente com mensagem de erro.
                 error = "Digite uma opção válida!"
                 main(error)
 
 
+# Carrega o banco de dados do arquivo JSON
+load_database()
+
 # "Roda" o programa
 main()
-
